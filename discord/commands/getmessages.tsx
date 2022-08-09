@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 const client = require("../client")
-
+231.75
 
 interface interactionType {
   [key: string]: any 
@@ -32,7 +32,7 @@ module.exports = {
         .fetch({ limit: 100, before: message.id })
         .then((messagePage: interactionType) => { 
           messagePage.forEach((msg: interactionType) => messages.push(msg));
-        
+          console.log(messages.length)
           //set new message pointer
           message = 0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
         })

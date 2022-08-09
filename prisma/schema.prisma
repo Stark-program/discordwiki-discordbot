@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model DiscordGuild {
+  Id       String    @id @unique
+  channels Channel[]
+}
+
+model Channel {
+  Id             String       @id @unique
+  channelName    String
+  discordGuild   DiscordGuild @relation(fields: [discordGuildId], references: [Id])
+  discordGuildId String
+  messages       Message[]
+}
+
+model Message {
+  Id                String  @id @unique
+  guildChannel      Channel @relation(fields: [guildChannelId], references: [Id])
+  guildChannelId    String
+  userId            String
+  username          String
+  content           String?
+  attachment        Boolean
+  attachmentContent String?
+}
