@@ -1,14 +1,11 @@
-version: "3.8"
+version: '3.4'
 services:
-  postgres:
-    image: postgres:10.3
-    restart: always
-    environment:
-      - POSTGRES_USER=${DOCKER_COMPOSE_USERNAME:?err}
-      - POSTGRES_PASSWORD=${DOCKER_COMPOSE_PASSWORD:?err}
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-volumes:
-  postgres:
+    postgres:
+        image: postgres:10.4
+        restart: always
+        ports:
+            - '5432:5432'
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
