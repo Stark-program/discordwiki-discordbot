@@ -13,7 +13,7 @@ datasource db {
 model DiscordGuild {
   Id       String    @id @unique
   channels Channel[]
-}
+} 
 
 model Channel {
   Id             String       @id @unique

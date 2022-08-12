@@ -1,8 +1,9 @@
-import  fs from "node:fs";
-import  path from "node:path";
-import  { REST } from "@discordjs/rest";
-import  { Routes } from "discord-api-types/v9";
-require("dotenv").config();
+import fs from "node:fs";
+import path from "node:path";
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const guildId = process.env.DISCORD_GUILD_ID;
 const clientId = process.env.DISCORD_APPLICATION_ID;
@@ -30,5 +31,3 @@ rest
     )
   )
   .catch(console.error);
-
- 
