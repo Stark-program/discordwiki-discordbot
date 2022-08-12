@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { TextInputStyle } from "discord.js";
 import express from "express";
+import { DiscordGuild, Channel, Message } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -8,18 +9,63 @@ const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 
-app.post("/data", async (req: any, res: any) => {
+interface interactionType {
+  [key: string]: any;
+}
+
+app.post("/data", async (req: interactionType, res: any) => {
   let data = req.body;
-  //   try {
-  //     const newGuild = await prisma.discordGuild.create({
-  //       data: {
-  //         Id: data.test.guild
-  //       },
-  //     });
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  console.log(data);
+  data.forEach(async (msg: interactionType) => {
+    try {
+      const newGuild: DiscordGuild = await prisma.discordGuild.upsert({
+        where: {
+          Id: msg.guild.id,
+        },
+        update: {},
+        create: {
+          Id: msg.guild.id,
+          guildName: msg.guild.name,
+        },
+      });
+      const newChannel: Channel = await prisma.channel.upsert({
+        where: {
+          Id: msg.channel.id,
+        },
+        update: {
+          channelName: msg.channel.channelName,
+        },
+        create: {
+          Id: msg.channel.id,
+          channelName: msg.channel.channelName,
+          discordGuildId: msg.channel.guildId,
+        },
+      });
+      const newMessage: Message = await prisma.message.upsert({
+        where: {
+          Id: msg.message.id,
+        },
+        update: {
+          attachmentContent:
+            msg.message.attachment.length > 0
+              ? msg.message.attachment[0].attachment
+              : null,
+        },
+        create: {
+          Id: msg.message.id,
+          guildChannelId: msg.message.channelId,
+          username: msg.message.username,
+          isBot: msg.message.bot,
+          content: msg.message.content,
+          attachmentContent:
+            msg.message.attachment.length > 0
+              ? msg.message.attachment[0].attachment
+              : null,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
 });
 app.listen(3000, () => {
   console.log("api server listening on port 3000");

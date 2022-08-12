@@ -6,7 +6,25 @@ const client = require("../client.tsx");
 interface interactionType {
   [key: string]: any;
 }
-
+interface MessageData {
+  guild: {
+    id: String;
+    name: String;
+  };
+  channel: {
+    id: String;
+    channelName: String;
+    guildId: String;
+  };
+  message: {
+    id: String;
+    channelId: String;
+    username: String;
+    bot: Boolean;
+    content: String;
+    attachment: Array<any>;
+  };
+}
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("getmessages")
@@ -34,14 +52,29 @@ module.exports = {
         .then((messagePage: interactionType) => {
           console.log("this is messagepage size", messagePage.size);
           messagePage.forEach((msg: interactionType) => {
+            let channelData = client.channels.cache.find(
+              (channel: any) => channel.id === msg.channelId
+            );
+
             //construct all necessary information to send to server
-            const messageData = {
-              guildId: msg.guildId,
-              channelId: msg.channelId,
-              username: msg.author.username,
-              bot: msg.author.bot,
-              content: msg.content,
-              attachment: msg.attachments,
+            const messageData: MessageData = {
+              guild: {
+                id: msg.guildId,
+                name: channelData.guild.name,
+              },
+              channel: {
+                id: msg.channelId,
+                channelName: channelData.name,
+                guildId: msg.guildId,
+              },
+              message: {
+                id: msg.id,
+                channelId: msg.channelId,
+                username: msg.author.username,
+                bot: msg.author.bot,
+                content: msg.content,
+                attachment: msg.attachments,
+              },
             };
             messages.push(messageData);
           });
@@ -50,7 +83,8 @@ module.exports = {
             0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
         });
     }
-    axios.post("http://localhost:3000/data", { messages }).then((res: any) => {
+    console.log(messages[3]);
+    axios.post("http://localhost:3000/data", messages).then((res: any) => {
       console.log(res);
     });
   },

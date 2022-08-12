@@ -11,7 +11,8 @@ datasource db {
 }
 
 model DiscordGuild {
-  Id       String    @id @unique
+  Id            String    @id 
+  guildName     String
   channels Channel[]
 } 
 
@@ -27,9 +28,8 @@ model Message {
   Id                String  @id @unique
   guildChannel      Channel @relation(fields: [guildChannelId], references: [Id])
   guildChannelId    String
-  userId            String
   username          String
+  isBot             Boolean
   content           String?
-  attachment        Boolean
-  attachmentContent String?
+  attachmentContent String
 }
