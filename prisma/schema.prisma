@@ -31,5 +31,5 @@ model Message {
   username          String
   isBot             Boolean
   content           String?
-  attachmentContent String
+  attachmentContent String[]
 }

@@ -40,6 +40,7 @@ app.post("/data", async (req: interactionType, res: any) => {
           discordGuildId: msg.channel.guildId,
         },
       });
+
       const newMessage: Message = await prisma.message.upsert({
         where: {
           Id: msg.message.id,
@@ -47,9 +48,10 @@ app.post("/data", async (req: interactionType, res: any) => {
         update: {
           attachmentContent:
             msg.message.attachment.length > 0
-              ? msg.message.attachment[0].attachment
-              : null,
+              ? msg.message.attachment
+              : undefined,
         },
+
         create: {
           Id: msg.message.id,
           guildChannelId: msg.message.channelId,
@@ -58,8 +60,8 @@ app.post("/data", async (req: interactionType, res: any) => {
           content: msg.message.content,
           attachmentContent:
             msg.message.attachment.length > 0
-              ? msg.message.attachment[0].attachment
-              : null,
+              ? msg.message.attachment
+              : undefined,
         },
       });
     } catch (err) {

@@ -22,7 +22,7 @@ interface MessageData {
     username: String;
     bot: Boolean;
     content: String;
-    attachment: Array<any>;
+    attachment: Array<string>;
   };
 }
 module.exports = {
@@ -55,6 +55,12 @@ module.exports = {
             let channelData = client.channels.cache.find(
               (channel: any) => channel.id === msg.channelId
             );
+            let attachments: Array<string> = [];
+            if (msg.attachments.size > 0) {
+              msg.attachments.forEach((value: any) => {
+                attachments.push(value.attachment);
+              });
+            }
 
             //construct all necessary information to send to server
             const messageData: MessageData = {
@@ -73,7 +79,7 @@ module.exports = {
                 username: msg.author.username,
                 bot: msg.author.bot,
                 content: msg.content,
-                attachment: msg.attachments,
+                attachment: attachments,
               },
             };
             messages.push(messageData);
@@ -83,7 +89,7 @@ module.exports = {
             0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
         });
     }
-    console.log(messages[3]);
+    console.log(messages[0]);
     axios.post("http://localhost:3000/data", messages).then((res: any) => {
       console.log(res);
     });
