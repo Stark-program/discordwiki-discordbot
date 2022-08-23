@@ -37,20 +37,9 @@ module.exports = {
     const messages: Array<any> = [];
     const channel = client.channels.cache.get(channelId);
 
-    //set initial message pointer to the last message sent in the channel
-    let message = await channel.messages
-      .fetch({ limit: 1 })
-      .then((messagePage: interactionType) => {
-        if (messagePage.size === 1) {
-          return messagePage;
-        } else return null;
-      });
-
-    while (message) {
       await channel.messages
-        .fetch({ limit: 100, before: message.id })
+        .fetch({ limit: 50 })
         .then((messagePage: interactionType) => {
-          console.log("this is messagepage size", messagePage.size);
           messagePage.forEach((msg: interactionType) => {
             let channelData = client.channels.cache.find(
               (channel: any) => channel.id === msg.channelId
@@ -84,14 +73,11 @@ module.exports = {
             };
             messages.push(messageData);
           });
-          //set new message pointer
-          message =
-            0 < messagePage.size ? messagePage.at(messagePage.size - 1) : null;
         });
-    }
-    console.log(messages[0]);
+   
+    console.log(messages.length);
     axios.post("http://localhost:3000/data", messages).then((res: any) => {
-      console.log(res);
+      // console.log(res); 
     });
   },
 };

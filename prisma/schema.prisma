@@ -17,7 +17,7 @@ model DiscordGuild {
 }
 
 model Channel {
-  Id             String       @id @unique
+  Id             String       @id
   channelName    String
   discordGuild   DiscordGuild @relation(fields: [discordGuildId], references: [Id])
   discordGuildId String
@@ -25,7 +25,7 @@ model Channel {
 }
 
 model Message {
-  Id                String   @id @unique
+  Id                String   @id
   guildChannel      Channel  @relation(fields: [guildChannelId], references: [Id])
   guildChannelId    String
   username          String

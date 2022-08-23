@@ -17,64 +17,75 @@ interface interactionType {
 
 app.post("/data", async (req: interactionType, res: any) => {
   let data = req.body;
-  data.forEach(async (msg: interactionType) => {
-    try {
-      const newGuild: DiscordGuild = await prisma.discordGuild.upsert({
-        where: {
-          Id: msg.guild.id,
-        },
-        update: {},
-        create: {
-          Id: msg.guild.id,
-          guildName: msg.guild.name,
-        },
-      });
-      const newChannel: Channel = await prisma.channel.upsert({
-        where: {
-          Id: msg.channel.id,
-        },
-        update: {
-          channelName: msg.channel.channelName,
-        },
-        create: {
-          Id: msg.channel.id,
-          channelName: msg.channel.channelName,
-          discordGuildId: msg.channel.guildId,
-        },
-      });
+  try {
+    data.forEach(async (msg:any) => {
+      const newGuild = prisma.discordGuild.upsert({
+              where: {
+                Id: msg.guild.id,
+              },
+              update: {},
+              create: {
+                Id: msg.guild.id,
+                guildName: msg.guild.name,
+              },
+            });
+            const newChannel = prisma.channel.upsert({
+              where: {
+                Id: msg.channel.id,
+              },
+              update: {
+                channelName: msg.channel.channelName,
+              },
+              create: {
+                Id: msg.channel.id,
+                channelName: msg.channel.channelName,
+                discordGuildId: msg.channel.guildId,
+              },
+            });
+      
+            const newMessage = prisma.message.upsert({
+              where: {
+                Id: msg.message.id,
+              },
+              update: { 
+                content: msg.message.content,
+                attachmentContent:
+                  msg.message.attachment.length > 0
+                    ? msg.message.attachment
+                    : undefined,
+              },
+      
+              create: {
+                Id: msg.message.id,
+                guildChannelId: msg.message.channelId,
+                username: msg.message.username,
+                isBot: msg.message.bot,
+                content: msg.message.content,
+                attachmentContent:
+                  msg.message.attachment.length > 0
+                    ? msg.message.attachment
+                    : undefined,
+              },
+            });
+            await prisma.$transaction([newGuild, newChannel, newMessage])
+    })
 
-      const newMessage: Message = await prisma.message.upsert({
-        where: {
-          Id: msg.message.id,
-        },
-        update: { 
-          attachmentContent:
-            msg.message.attachment.length > 0
-              ? msg.message.attachment
-              : undefined,
-        },
-
-        create: {
-          Id: msg.message.id,
-          guildChannelId: msg.message.channelId,
-          username: msg.message.username,
-          isBot: msg.message.bot,
-          content: msg.message.content,
-          attachmentContent:
-            msg.message.attachment.length > 0
-              ? msg.message.attachment
-              : undefined,
-        },
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  });
+    
+  } catch (err) {
+    console.log(err)
+  }
+  // data.forEach(async (msg: interactionType) => {
+  //   try {
+  //    
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // });
 });
 
 export function expressServer() {
-app.listen(3000, () => {
-  console.log("api server listening on port 3000");
-});
+  app.listen(3000, () => {
+    console.log("api server listening on port 3000");
+  });
 }
 
