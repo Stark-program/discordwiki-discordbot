@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { TextInputStyle } from "discord.js";
 import express from "express";
 import { DiscordGuild, Channel, Message } from "@prisma/client";
 
@@ -8,6 +7,9 @@ const app = express();
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
+
+
+
 
 interface interactionType {
   [key: string]: any;
@@ -45,7 +47,7 @@ app.post("/data", async (req: interactionType, res: any) => {
         where: {
           Id: msg.message.id,
         },
-        update: {
+        update: { 
           attachmentContent:
             msg.message.attachment.length > 0
               ? msg.message.attachment
@@ -69,6 +71,10 @@ app.post("/data", async (req: interactionType, res: any) => {
     }
   });
 });
+
+export function expressServer() {
 app.listen(3000, () => {
   console.log("api server listening on port 3000");
 });
+}
+

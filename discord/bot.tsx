@@ -3,13 +3,12 @@ import path from "node:path";
 import { Collection, PermissionsBitField, InteractionType } from "discord.js";
 import * as dotenv from 'dotenv'
 dotenv.config()
-
 const client = require("./client.tsx");
 
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-  });
 
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
 /* ################# COMMANDS ##############################*/
 client.commands = new Collection();
 
@@ -73,7 +72,12 @@ for (const file of eventFiles) {
     client.on(event.name, (...args:Array<string>) => event.execute(...args));
   }
 }
+export function discordLogin() {
+  client.login(process.env.DISCORD_LOGIN)
+}
 
-client.login(process.env.DISCORD_LOGIN);
+
+
+
 
 

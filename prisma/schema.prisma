@@ -11,10 +11,10 @@ datasource db {
 }
 
 model DiscordGuild {
-  Id            String    @id 
-  guildName     String
-  channels Channel[]
-} 
+  Id        String    @id
+  guildName String
+  channels  Channel[]
+}
 
 model Channel {
   Id             String       @id @unique
@@ -25,8 +25,8 @@ model Channel {
 }
 
 model Message {
-  Id                String  @id @unique
-  guildChannel      Channel @relation(fields: [guildChannelId], references: [Id])
+  Id                String   @id @unique
+  guildChannel      Channel  @relation(fields: [guildChannelId], references: [Id])
   guildChannelId    String
   username          String
   isBot             Boolean

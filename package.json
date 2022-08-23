@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bot": "ts-node-dev --respawn discord/bot.tsx",
-    "server": "ts-node-dev --respawn discord/data/index.tsx"
+    "startup": "ts-node-dev --respawn discord/startup.tsx"
   },
   "dependencies": {
     "@prisma/client": "^4.2.0",
