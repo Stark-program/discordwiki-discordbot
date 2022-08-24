@@ -56,9 +56,7 @@ app.post("/data", async (req: interactionType, res: any) => {
   }
 
   try {
-    const posted = await storeData(data).catch((e) => {
-      console.log(e)
-    })
+    const posted = await storeData(data)
     if (posted === true) {
       res.send("All messages successfully saved to database")
     } else {
