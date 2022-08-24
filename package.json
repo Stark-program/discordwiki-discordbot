@@ -5,9 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startup": "ts-node-dev --respawn discord/startup.tsx"
+    "startup": "ts-node-dev --respawn discord/startup.tsx",
+    "deploy-g-commands": "ts-node discord/deploy-commands/deploy-global-commands.tsx",
+    "deploy-local-commands": "ts-node discord/deploy-commands/deploy-local-commands.tsx"
   },
   "dependencies": {
+    "@discordjs/rest": "^1.1.0",
     "@prisma/client": "^4.2.0",
     "axios": "^0.27.2",
     "discord.js": "^14.0.3",

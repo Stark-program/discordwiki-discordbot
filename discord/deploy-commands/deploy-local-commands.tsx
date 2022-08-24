@@ -5,12 +5,13 @@ import { Routes } from "discord-api-types/v9";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const guildId = process.env.DISCORD_GUILD_ID;
-const clientId = process.env.DISCORD_APPLICATION_ID;
-const applicationToken = process.env.DISCORD_LOGIN;
+const guildId = process.env.DISCORD_GUILD_ID || "No guild Id";
+const clientId = process.env.DISCORD_APPLICATION_ID || "No client Id";
+const applicationToken = process.env.DISCORD_LOGIN || "No token";
 
 const commands = [];
-const commandsPath = path.join(__dirname, "commands");
+const dirPath = process.env.DISCORD_DIRECTORY_PATH || "Path not given";
+const commandsPath = path.join(dirPath, "commands");
 const commandFiles = fs
   .readdirSync(commandsPath)
   .filter((file: string) => file.endsWith(".tsx"));
@@ -21,7 +22,7 @@ for (const file of commandFiles) {
   commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: "9" }).setToken(applicationToken);
+const rest = new REST({ version: "10" }).setToken(applicationToken);
 
 rest
   .put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
