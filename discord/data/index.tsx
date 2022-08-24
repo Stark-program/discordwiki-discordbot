@@ -1,16 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
-import { DiscordGuild, Channel, Message } from "@prisma/client";
+
 
 const prisma = new PrismaClient();
 const app = express();
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
-
-
-
-
 interface interactionType {
   [key: string]: any;
 }
@@ -19,68 +15,55 @@ app.post("/data", async (req: interactionType, res: any) => {
 
   let data = req.body;
 
-  function storeData (data: interactionType) {
-    Promise.all(data.map(async (msg: interactionType) => {
-      const newGuild = prisma.discordGuild.upsert({
-              where: {
-                Id: msg.guild.id,
-              },
-              update: {},
-              create: {
-                Id: msg.guild.id,
-                guildName: msg.guild.name,
-              },
-            });
-            const newChannel = prisma.channel.upsert({
-              where: {
-                Id: msg.channel.id,
-              },
-              update: {
-                channelName: msg.channel.channelName,
-              },
-              create: {
-                Id: msg.channel.id,
-                channelName: msg.channel.channelName,
-                discordGuildId: msg.channel.guildId,
-              },
-            });
-      
-            const newMessage = prisma.message.upsert({
-              where: {
-                Id: msg.message.id
-              },
-              update: { 
-                content: msg.message.content,
-                attachmentContent:
-                  msg.message.attachment.length > 0
-                    ? msg.message.attachment
-                    : undefined,
-              },
-      
-              create: {
-                Id: msg.message.id,
-                guildChannelId: msg.message.channelId,
-                username: msg.message.username,
-                isBot: msg.message.bot,
-                content: msg.message.content,
-                attachmentContent:
-                  msg.message.attachment.length > 0
-                    ? msg.message.attachment
-                    : undefined,
-              },
-            });
-            let dataPost = await prisma.$transaction([newGuild, newChannel, newMessage])
-            return dataPost
-    })).then((posted) => {
-      if (posted) {
-        res.send("All messages were saved to the database")
-      } else {
-        res.send("Something went wrong saving messages")
-      }
-    })
+  async function storeData (data: any) {
+    let guild = data.guild
+    let channel = data.channel
+    let messages = data.message 
+
+    const newGuild = await prisma.discordGuild.upsert({
+                where: {
+                  Id: guild.id,
+                },
+                update: {
+                  guildName: guild.name
+                },
+                create: {
+                  Id: guild.id,
+                  guildName: guild.name,
+                },
+              });
+    const newChannel = await prisma.channel.upsert({
+                where: {
+                  Id: channel.id,
+                },
+                update: {
+                  channelName: channel.channelName,
+                },
+                create: {
+                  Id: channel.id,
+                  channelName: channel.channelName,
+                  discordGuildId: channel.guildId,
+                },
+              });
+    const newMessages = await prisma.message.createMany({
+      data: messages,
+      skipDuplicates: true 
+    }) 
+
+    if (newGuild && newChannel && newMessages) {
+      return true
+    } else return false
   }
+
   try {
-    storeData(data) 
+    const posted = await storeData(data).catch((e) => {
+      console.log(e)
+    })
+    if (posted === true) {
+      res.send("All messages successfully saved to database")
+    } else {
+      res.send("Something went wrong saving the messages to the database")
+    }
   } catch (err) {
     console.log(err)
   }

@@ -7,23 +7,14 @@ interface interactionType {
   [key: string]: any;
 }
 interface MessageData {
-  guild: {
-    id: String;
-    name: String;
-  };
-  channel: {
-    id: String;
-    channelName: String;
-    guildId: String;
-  };
-  message: {
-    id: String;
-    channelId: String;
+ 
+    Id: String;
+    guildChannelId: String;
     username: String;
-    bot: Boolean;
+    isBot: Boolean;
     content: String;
-    attachment: Array<string>;
-  };
+    attachmentContent: Array<string>;
+ 
 }
 module.exports = {
   data: new SlashCommandBuilder()
@@ -32,11 +23,26 @@ module.exports = {
       "Gives the wiki bot the entire message history of this text channel"
     ),
   async execute(interaction: interactionType) {
+    const guildName = interaction.member.guild.name
     const guildId = interaction.guildId;
     const channelId = interaction.channelId;
     const messages: Array<any> = [];
     const channel = client.channels.cache.get(channelId);
-    await interaction.deferReply()
+    const channelName = channel.name
+   interaction.deferReply()
+    const data = {
+      guild: {
+        id: guildId,
+        name: guildName
+      },
+      channel: {
+        id: channelId,
+        channelName: channelName,
+        guildId: guildId
+      },
+      message: messages
+    }
+    
       await channel.messages
         .fetch({ limit: 50 })
         .then((messagePage: interactionType) => {
@@ -53,31 +59,19 @@ module.exports = {
 
             //construct all necessary information to send to server
             const messageData: MessageData = {
-              guild: {
-                id: msg.guildId,
-                name: channelData.guild.name,
-              },
-              channel: {
-                id: msg.channelId,
-                channelName: channelData.name,
-                guildId: msg.guildId,
-              },
-              message: {
-                id: msg.id,
-                channelId: msg.channelId,
+                Id: msg.id,
+                guildChannelId: channelId,
                 username: msg.author.username,
-                bot: msg.author.bot,
+                isBot: msg.author.bot,
                 content: msg.content,
-                attachment: attachments,
-              },
+                attachmentContent: attachments,  
             };
             messages.push(messageData);
           });
         });
    
-    console.log(messages.length);
-    axios.post("http://localhost:3000/data", messages).then(async (res: any) => {
-      console.log(res.data);
+   
+    axios.post("http://localhost:3000/data", data).then(async (res: any) => {
       await interaction.editReply(res.data) 
     });
   },
