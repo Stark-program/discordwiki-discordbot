@@ -36,7 +36,7 @@ module.exports = {
     const channelId = interaction.channelId;
     const messages: Array<any> = [];
     const channel = client.channels.cache.get(channelId);
-
+    await interaction.deferReply()
       await channel.messages
         .fetch({ limit: 50 })
         .then((messagePage: interactionType) => {
@@ -76,8 +76,9 @@ module.exports = {
         });
    
     console.log(messages.length);
-    axios.post("http://localhost:3000/data", messages).then((res: any) => {
-      // console.log(res); 
+    axios.post("http://localhost:3000/data", messages).then(async (res: any) => {
+      console.log(res.data);
+      await interaction.editReply(res.data) 
     });
   },
 };

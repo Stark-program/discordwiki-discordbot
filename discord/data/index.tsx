@@ -16,9 +16,11 @@ interface interactionType {
 }
 
 app.post("/data", async (req: interactionType, res: any) => {
+
   let data = req.body;
-  try {
-    data.forEach(async (msg:any) => {
+
+  function storeData (data: interactionType) {
+    Promise.all(data.map(async (msg: interactionType) => {
       const newGuild = prisma.discordGuild.upsert({
               where: {
                 Id: msg.guild.id,
@@ -45,7 +47,7 @@ app.post("/data", async (req: interactionType, res: any) => {
       
             const newMessage = prisma.message.upsert({
               where: {
-                Id: msg.message.id,
+                Id: msg.message.id
               },
               update: { 
                 content: msg.message.content,
@@ -67,20 +69,21 @@ app.post("/data", async (req: interactionType, res: any) => {
                     : undefined,
               },
             });
-            await prisma.$transaction([newGuild, newChannel, newMessage])
+            let dataPost = await prisma.$transaction([newGuild, newChannel, newMessage])
+            return dataPost
+    })).then((posted) => {
+      if (posted) {
+        res.send("All messages were saved to the database")
+      } else {
+        res.send("Something went wrong saving messages")
+      }
     })
-
-    
+  }
+  try {
+    storeData(data) 
   } catch (err) {
     console.log(err)
   }
-  // data.forEach(async (msg: interactionType) => {
-  //   try {
-  //    
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // });
 });
 
 export function expressServer() {
