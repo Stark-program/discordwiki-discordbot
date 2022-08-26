@@ -13,8 +13,8 @@ const commandFiles = fs
   .filter((file: string) => file.endsWith(".tsx"));
 
 // Place your client id here
-const clientId = process.env.DISCORD_APPLICATION_ID!;
-const applicationToken = process.env.DISCORD_LOGIN!;
+const clientId = process.env.DISCORD_APPLICATION_ID || "No client Id";
+const applicationToken = process.env.DISCORD_LOGIN || "No Application Token";
 
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);

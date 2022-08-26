@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { GuildWidgetStyle } from "discord.js";
 import express from "express";
+var cors = require("cors");
 
 const prisma = new PrismaClient();
 const app = express();
 
+app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb" }));
 interface interactionType {
@@ -21,25 +22,25 @@ app.post("/data", async (req: interactionType, res: any) => {
 
     const newGuild = await prisma.discordGuild.upsert({
       where: {
-        Id: guild.id,
+        id: guild.id,
       },
       update: {
         guildName: guild.name,
       },
       create: {
-        Id: guild.id,
+        id: guild.id,
         guildName: guild.name,
       },
     });
     const newChannel = await prisma.channel.upsert({
       where: {
-        Id: channel.id,
+        id: channel.id,
       },
       update: {
         channelName: channel.channelName,
       },
       create: {
-        Id: channel.id,
+        id: channel.id,
         channelName: channel.channelName,
         discordGuildId: channel.guildId,
       },
@@ -70,7 +71,7 @@ function getGuildAndChannelData(guildId: any, channelId: any) {
   if (channelId === null) {
     return prisma.discordGuild.findUnique({
       where: {
-        Id: guildId,
+        id: guildId,
       },
       include: {
         channels: true,
@@ -79,12 +80,12 @@ function getGuildAndChannelData(guildId: any, channelId: any) {
   } else {
     return prisma.discordGuild.findUnique({
       where: {
-        Id: guildId,
+        id: guildId,
       },
       include: {
         channels: {
           where: {
-            Id: channelId,
+            id: channelId,
           },
           include: {
             messages: true,
@@ -101,7 +102,7 @@ app.get("/guilds/:guildId/:channelId", async (req, res) => {
       if (data === null || data === undefined) {
         res.send("Guild not found");
       } else if (data.channels[0] === undefined || data.channels[0] === null) {
-        res.send("No Guild Channels found");
+        res.send(`No Channels found by that id in ${data.guildName}`);
       } else if (
         data.channels[0].messages === undefined ||
         data.channels[0].messages === null
@@ -117,9 +118,9 @@ app.get("/guilds/:guildId/:channelId", async (req, res) => {
 app.get("/guilds/:guildId", async (req, res) => {
   getGuildAndChannelData(req.params.guildId, null).then((data: any) => {
     if (data === null || data === undefined) {
-      res.send("Guild not found");
+      res.send([]);
     } else {
-      res.send(data);
+      res.send([data]);
     }
   });
 });
@@ -127,7 +128,7 @@ app.get("/guilds/:guildId", async (req, res) => {
 app.get("/guilds", async (req, res) => {
   prisma.discordGuild.findMany().then((data: any) => {
     if (data === null || data === undefined) {
-      res.send("No guilds found");
+      res.send("No guilds found by that id");
     } else {
       res.send(data);
     }
