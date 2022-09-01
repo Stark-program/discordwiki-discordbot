@@ -26,10 +26,12 @@ app.post("/data", async (req: interactionType, res: any) => {
       },
       update: {
         guildName: guild.name,
+        guildAvatar: guild.guildAvatar,
       },
       create: {
         id: guild.id,
         guildName: guild.name,
+        guildAvatar: guild.guildAvatar,
       },
     });
     const newChannel = await prisma.channel.upsert({
@@ -38,11 +40,13 @@ app.post("/data", async (req: interactionType, res: any) => {
       },
       update: {
         channelName: channel.channelName,
+        guildName: channel.guildName,
       },
       create: {
         id: channel.id,
         channelName: channel.channelName,
         discordGuildId: channel.guildId,
+        guildName: channel.guildName,
       },
     });
     const newMessages = await prisma.message.createMany({

@@ -10,9 +10,25 @@ interface MessageData {
   id: String;
   guildChannelId: String;
   username: String;
+  userAvatar: String;
   isBot: Boolean;
   content: String;
   attachmentContent: Array<string>;
+}
+
+interface GuildData {
+  guild: {
+    id: String;
+    name: String;
+    guildAvatar: String;
+  };
+  channel: {
+    id: String;
+    channelName: String;
+    guildId: String;
+    guildName: String;
+  };
+  message: Array<MessageData>;
 }
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,21 +38,25 @@ module.exports = {
     ),
   async execute(interaction: interactionType) {
     const guildName = interaction.member.guild.name;
+
+    const guildAvatar = interaction.member.guild.iconURL();
     const guildId = interaction.guildId;
     const channelId = interaction.channelId;
     const messages: Array<any> = [];
     const channel = client.channels.cache.get(channelId);
     const channelName = channel.name;
     interaction.deferReply();
-    const data = {
+    const data: GuildData = {
       guild: {
         id: guildId,
         name: guildName,
+        guildAvatar: guildAvatar === null ? "" : guildAvatar,
       },
       channel: {
         id: channelId,
         channelName: channelName,
         guildId: guildId,
+        guildName: guildName,
       },
       message: messages,
     };
@@ -45,6 +65,7 @@ module.exports = {
       .fetch({ limit: 50 })
       .then((messagePage: interactionType) => {
         messagePage.forEach((msg: interactionType) => {
+          const userAvatar = msg.author.avatarURL();
           let channelData = client.channels.cache.find(
             (channel: any) => channel.id === msg.channelId
           );
@@ -60,6 +81,7 @@ module.exports = {
             id: msg.id,
             guildChannelId: channelId,
             username: msg.author.username,
+            userAvatar: userAvatar === null ? "" : userAvatar,
             isBot: msg.author.bot,
             content: msg.content,
             attachmentContent: attachments,
