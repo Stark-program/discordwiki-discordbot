@@ -8,6 +8,7 @@ interface interactionType {
 }
 interface MessageData {
   id: String;
+  timestamp: String;
   guildChannelId: String;
   username: String;
   userAvatar: String;
@@ -38,14 +39,13 @@ module.exports = {
     ),
   async execute(interaction: interactionType) {
     const guildName = interaction.member.guild.name;
-
     const guildAvatar = interaction.member.guild.iconURL();
     const guildId = interaction.guildId;
     const channelId = interaction.channelId;
     const messages: Array<any> = [];
     const channel = client.channels.cache.get(channelId);
     const channelName = channel.name;
-    interaction.deferReply();
+    interaction.deferReply({ ephemeral: true });
     const data: GuildData = {
       guild: {
         id: guildId,
@@ -60,15 +60,25 @@ module.exports = {
       },
       message: messages,
     };
+    //function that gets timestamp of message and converts it to a date and time
+    function getDateTime(timestamp: any) {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+      const seconds = date.getSeconds();
+
+      return `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
+    }
 
     await channel.messages
       .fetch({ limit: 50 })
       .then((messagePage: interactionType) => {
         messagePage.forEach((msg: interactionType) => {
+          const dateOfMessage = getDateTime(msg.createdTimestamp);
           const userAvatar = msg.author.avatarURL();
-          let channelData = client.channels.cache.find(
-            (channel: any) => channel.id === msg.channelId
-          );
           let attachments: Array<string> = [];
           if (msg.attachments.size > 0) {
             msg.attachments.forEach((value: any) => {
@@ -79,6 +89,7 @@ module.exports = {
           //construct all necessary information to send to server
           const messageData: MessageData = {
             id: msg.id,
+            timestamp: dateOfMessage,
             guildChannelId: channelId,
             username: msg.author.username,
             userAvatar: userAvatar === null ? "" : userAvatar,
@@ -91,7 +102,7 @@ module.exports = {
       });
 
     axios.post("http://localhost:3000/data", data).then(async (res: any) => {
-      await interaction.editReply(res.data);
+      await interaction.editReply({ content: res.data, ephemeral: true });
     });
   },
 };
