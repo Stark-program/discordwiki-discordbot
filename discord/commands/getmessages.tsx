@@ -76,7 +76,7 @@ module.exports = {
       return `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
     }
 
-    async function getNameOfUserMention(userId: string) {
+    function getNameOfUserMention(userId: string) {
       if (userId.startsWith("<@") && userId.endsWith(">")) {
         userId = userId.slice(2, -1);
 
@@ -88,7 +88,7 @@ module.exports = {
       }
     }
 
-    async function spliceUserMention(mention: string) {
+    function spliceUserMention(mention: string) {
       const mentionArray = mention.split(" ");
 
       // Regex checking for userId in the message content between the chcracters <@ and >
@@ -96,22 +96,23 @@ module.exports = {
 
       for (let i = 0; i < mentionArray.length; i++) {
         if (mentionArray[i].match(regexMatch)) {
-          const username = await getNameOfUserMention(mentionArray[i]);
+          const username = getNameOfUserMention(mentionArray[i]);
           mentionArray[i] = "@" + username;
         }
       }
       const finalString = mentionArray.join(" ");
+      console.log(finalString);
       return finalString;
     }
 
     const messagePage = await channel.messages.fetch({ limit: 50 });
 
-    for await (const msg of messagePage.values()) {
+    messagePage.forEach((msg: any) => {
       const dateOfMessage = getDateTime(msg.createdTimestamp);
       const userAvatar = msg.author.avatarURL();
       const isUserMentioned = msg.mentions.users.size > 0;
       const finalContentString = isUserMentioned
-        ? await spliceUserMention(msg.content)
+        ? spliceUserMention(msg.content)
         : msg.content;
 
       let attachments: Array<string> = [];
@@ -134,10 +135,8 @@ module.exports = {
       };
 
       messages.push(messageData);
-    }
-
-    axios.post("http://localhost:3000/data", data).then(async (res: any) => {
-      await interaction.editReply({ content: res.data, ephemeral: true });
     });
+    const response = await axios.post("http://localhost:3000/data", data);
+    await interaction.editReply({ content: response.data, ephemeral: true });
   },
 };
