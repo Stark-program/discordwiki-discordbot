@@ -1,5 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import axios from "axios";
+const {
+  MessageMentions: { USERS_PATTERN },
+} = require("discord.js");
 
 const client = require("../client.tsx");
 
@@ -73,33 +76,65 @@ module.exports = {
       return `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
     }
 
-    await channel.messages
-      .fetch({ limit: 50 })
-      .then((messagePage: interactionType) => {
-        messagePage.forEach((msg: interactionType) => {
-          const dateOfMessage = getDateTime(msg.createdTimestamp);
-          const userAvatar = msg.author.avatarURL();
-          let attachments: Array<string> = [];
-          if (msg.attachments.size > 0) {
-            msg.attachments.forEach((value: any) => {
-              attachments.push(value.attachment);
-            });
-          }
+    async function getNameOfUserMention(userId: string) {
+      if (userId.startsWith("<@") && userId.endsWith(">")) {
+        userId = userId.slice(2, -1);
 
-          //construct all necessary information to send to server
-          const messageData: MessageData = {
-            id: msg.id,
-            timestamp: dateOfMessage,
-            guildChannelId: channelId,
-            username: msg.author.username,
-            userAvatar: userAvatar === null ? "" : userAvatar,
-            isBot: msg.author.bot,
-            content: msg.content,
-            attachmentContent: attachments,
-          };
-          messages.push(messageData);
+        if (userId.startsWith("!")) {
+          userId = userId.slice(1);
+        }
+        const user = client.users.cache.get(userId);
+        return user.username;
+      }
+    }
+
+    async function spliceUserMention(mention: string) {
+      const mentionArray = mention.split(" ");
+
+      // Regex checking for userId in the message content between the chcracters <@ and >
+      const regexMatch = /^<@!?(\d+)>$/;
+
+      for (let i = 0; i < mentionArray.length; i++) {
+        if (mentionArray[i].match(regexMatch)) {
+          const username = await getNameOfUserMention(mentionArray[i]);
+          mentionArray[i] = "@" + username;
+        }
+      }
+      const finalString = mentionArray.join(" ");
+      return finalString;
+    }
+
+    const messagePage = await channel.messages.fetch({ limit: 50 });
+
+    for await (const msg of messagePage.values()) {
+      const dateOfMessage = getDateTime(msg.createdTimestamp);
+      const userAvatar = msg.author.avatarURL();
+      const isUserMentioned = msg.mentions.users.size > 0;
+      const finalContentString = isUserMentioned
+        ? await spliceUserMention(msg.content)
+        : msg.content;
+
+      let attachments: Array<string> = [];
+      if (msg.attachments.size > 0) {
+        msg.attachments.forEach((value: any) => {
+          attachments.push(value.attachment);
         });
-      });
+      }
+
+      //construct all necessary information to send to server
+      const messageData: MessageData = {
+        id: msg.id,
+        timestamp: dateOfMessage,
+        guildChannelId: channelId,
+        username: msg.author.username,
+        userAvatar: userAvatar === null ? "" : userAvatar,
+        isBot: msg.author.bot,
+        content: finalContentString,
+        attachmentContent: attachments,
+      };
+
+      messages.push(messageData);
+    }
 
     axios.post("http://localhost:3000/data", data).then(async (res: any) => {
       await interaction.editReply({ content: res.data, ephemeral: true });
