@@ -84,7 +84,12 @@ module.exports = {
           userId = userId.slice(1);
         }
         const user = client.users.cache.get(userId);
-        return user.username;
+
+        if (user === undefined) {
+          return "User not found";
+        } else {
+          return user.username;
+        }
       }
     }
 
