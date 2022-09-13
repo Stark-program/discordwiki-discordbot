@@ -108,33 +108,37 @@ module.exports = {
     const messagePage = await channel.messages.fetch({ limit: 50 });
 
     messagePage.forEach((msg: any) => {
-      const dateOfMessage = getDateTime(msg.createdTimestamp);
-      const userAvatar = msg.author.avatarURL();
-      const isUserMentioned = msg.mentions.users.size > 0;
-      const finalContentString = isUserMentioned
-        ? spliceUserMention(msg.content)
-        : msg.content;
+      try {
+        const dateOfMessage = getDateTime(msg.createdTimestamp);
+        const userAvatar = msg.author.avatarURL();
+        const isUserMentioned = msg.mentions.users.size > 0;
+        const finalContentString = isUserMentioned
+          ? spliceUserMention(msg.content)
+          : msg.content;
 
-      let attachments: Array<string> = [];
-      if (msg.attachments.size > 0) {
-        msg.attachments.forEach((value: any) => {
-          attachments.push(value.attachment);
-        });
+        let attachments: Array<string> = [];
+        if (msg.attachments.size > 0) {
+          msg.attachments.forEach((value: any) => {
+            attachments.push(value.attachment);
+          });
+        }
+
+        //construct all necessary information to send to server
+        const messageData: MessageData = {
+          id: msg.id,
+          timestamp: dateOfMessage,
+          guildChannelId: channelId,
+          username: msg.author.username,
+          userAvatar: userAvatar === null ? "" : userAvatar,
+          isBot: msg.author.bot,
+          content: finalContentString,
+          attachmentContent: attachments,
+        };
+
+        messages.push(messageData);
+      } catch (error) {
+        console.log(error);
       }
-
-      //construct all necessary information to send to server
-      const messageData: MessageData = {
-        id: msg.id,
-        timestamp: dateOfMessage,
-        guildChannelId: channelId,
-        username: msg.author.username,
-        userAvatar: userAvatar === null ? "" : userAvatar,
-        isBot: msg.author.bot,
-        content: finalContentString,
-        attachmentContent: attachments,
-      };
-
-      messages.push(messageData);
     });
     const response = await axios.post("http://localhost:3000/data", data);
     await interaction.editReply({ content: response.data, ephemeral: true });
