@@ -106,7 +106,6 @@ module.exports = {
         }
       }
       const finalString = mentionArray.join(" ");
-      console.log(finalString);
       return finalString;
     }
 
