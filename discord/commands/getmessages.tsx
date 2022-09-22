@@ -90,19 +90,36 @@ module.exports = {
         } else {
           return user.username;
         }
+      } else {
+        const user = client.users.cache.get(userId);
+
+        if (user === undefined) {
+          return "User not found";
+        } else {
+          return user.username;
+        }
       }
     }
 
     function spliceUserMention(mention: string) {
-      const mentionArray = mention.split(" ");
+      const mentionArray = mention.split(/[ ,]+/);
 
       // Regex checking for userId in the message content between the chcracters <@ and >
       const regexMatch = /^<@!?(\d+)>$/;
 
       for (let i = 0; i < mentionArray.length; i++) {
-        if (mentionArray[i].match(regexMatch)) {
-          const username = getNameOfUserMention(mentionArray[i]);
-          mentionArray[i] = "@" + username;
+        if (mentionArray[i].includes("<@")) {
+          if (mentionArray[i].match(regexMatch)) {
+            const username = getNameOfUserMention(mentionArray[i]);
+            mentionArray[i] = "@" + username;
+          } else {
+            let mentionString = mentionArray[i].substring(
+              mentionArray[i].indexOf("@") + 1,
+              mentionArray[i].indexOf(">")
+            );
+            const username = getNameOfUserMention(mentionString);
+            mentionArray[i] = "@" + username;
+          }
         }
       }
       const finalString = mentionArray.join(" ");
