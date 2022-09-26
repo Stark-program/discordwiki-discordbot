@@ -140,7 +140,7 @@ app.get("/guilds", async (req, res) => {
   });
 });
 
-app.post("/opengraph", async (req, res) => {
+app.post("/opengraph", async (req: { body: { url: string } }, res) => {
   const url = req.body.url;
   const options = { url: url, onlyGetOpenGraphInfo: true };
   ogs(options, function (error: any, results: any) {
