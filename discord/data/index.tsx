@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import express from "express";
 var cors = require("cors");
+const ogs = require("open-graph-scraper");
 
 const prisma = new PrismaClient();
 const app = express();
@@ -135,6 +136,18 @@ app.get("/guilds", async (req, res) => {
       res.send("No guilds found by that id");
     } else {
       res.send(data);
+    }
+  });
+});
+
+app.post("/opengraph", async (req, res) => {
+  const url = req.body.url;
+  const options = { url: url, onlyGetOpenGraphInfo: true };
+  ogs(options, function (error: any, results: any) {
+    if (error) {
+      res.send(error);
+    } else {
+      res.send(results);
     }
   });
 });
