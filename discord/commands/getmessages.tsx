@@ -1,9 +1,12 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import axios from "axios";
+import * as dotenv from "dotenv";
+dotenv.config();
 const {
   MessageMentions: { USERS_PATTERN },
 } = require("discord.js");
 
+const API_ENDPOINT = process.env.API_ENDPOINT;
 const client = require("../client.tsx");
 
 interface interactionType {
@@ -162,7 +165,7 @@ module.exports = {
         console.log(error);
       }
     });
-    const response = await axios.post("http://localhost:3000/data", data);
+    const response = await axios.post(`${API_ENDPOINT}data`, data);
     await interaction.editReply({ content: response.data, ephemeral: true });
   },
 };
