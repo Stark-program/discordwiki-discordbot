@@ -142,7 +142,6 @@ module.exports = {
 
         let attachments: Array<string> = [];
         if (msg.attachments.size > 0) {
-          console.log(msg);
           msg.attachments.forEach((value: any) => {
             attachments.push(value.attachment);
           });
