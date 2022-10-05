@@ -1,12 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Collection, PermissionsBitField, InteractionType } from "discord.js";
-import * as dotenv from 'dotenv'
-dotenv.config()
+import * as dotenv from "dotenv";
+dotenv.config();
 const client = require("./client.tsx");
 
-
-client.on('ready', () => {
+client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 /* ################# COMMANDS ##############################*/
@@ -19,12 +18,10 @@ const commandFiles = fs
   .filter((file: string) => file.endsWith(".tsx"));
 
 for (const file of commandFiles) {
- 
   const filePath = path.join(commandsPath, file);
-  
+
   const command = require(filePath);
- 
- 
+
   client.commands.set(command.data.name, command);
 }
 
@@ -67,17 +64,11 @@ for (const file of eventFiles) {
   const filePath = path.join(eventsPath, file);
   const event = require(filePath);
   if (event.once) {
-    client.once(event.name, (...args:Array<string> ) => event.execute(...args));
+    client.once(event.name, (...args: Array<string>) => event.execute(...args));
   } else {
-    client.on(event.name, (...args:Array<string>) => event.execute(...args));
+    client.on(event.name, (...args: Array<string>) => event.execute(...args));
   }
 }
 export function discordLogin() {
-  client.login(process.env.DISCORD_LOGIN)
+  client.login(process.env.DISCORD_LOGIN);
 }
-
-
-
-
-
-

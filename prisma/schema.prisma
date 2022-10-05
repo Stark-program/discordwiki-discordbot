@@ -28,7 +28,7 @@ model Channel {
 
 model Message {
   id                String   @id
-  timestamp         String
+  timestamp         Int
   guildChannel      Channel  @relation(fields: [guildChannelId], references: [id])
   guildChannelId    String
   username          String

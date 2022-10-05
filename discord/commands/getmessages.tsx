@@ -14,7 +14,7 @@ interface interactionType {
 }
 interface MessageData {
   id: String;
-  timestamp: String;
+  timestamp: Number;
   guildChannelId: String;
   username: String;
   userAvatar: String;
@@ -66,18 +66,6 @@ module.exports = {
       },
       message: messages,
     };
-    //function that gets timestamp of message and converts it to a date and time
-    function getDateTime(timestamp: any) {
-      const date = new Date(timestamp);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const hour = date.getHours();
-      const minute = date.getMinutes();
-      const seconds = date.getSeconds();
-
-      return `${year}-${month}-${day} ${hour}:${minute}:${seconds}`;
-    }
 
     function getNameOfUserMention(userId: string) {
       if (userId.startsWith("<@") && userId.endsWith(">")) {
@@ -133,7 +121,7 @@ module.exports = {
 
     messagePage.forEach((msg: any) => {
       try {
-        const dateOfMessage = getDateTime(msg.createdTimestamp);
+        const dateOfMessage = msg.createdTimestamp;
         const userAvatar = msg.author.avatarURL();
         const isUserMentioned = msg.mentions.users.size > 0;
         const finalContentString = isUserMentioned
