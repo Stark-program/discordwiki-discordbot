@@ -19,7 +19,7 @@ model Channel {
   channelName    String
   discordGuildId String
   guildName      String
-  discordGuild   DiscordGuild @relation(fields: [discordGuildId], references: [id])
+  discordGuild   DiscordGuild @relation(fields: [discordGuildId], references: [id], onDelete: Cascade)
   messages       Message[]
 }
 
@@ -32,5 +32,5 @@ model Message {
   isBot             Boolean
   content           String?
   attachmentContent String[]
-  guildChannel      Channel  @relation(fields: [guildChannelId], references: [id])
+  guildChannel      Channel  @relation(fields: [guildChannelId], references: [id], onDelete: Cascade)
 }
